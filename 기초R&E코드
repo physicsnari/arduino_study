@@ -33,26 +33,28 @@ void loop() {
 
 p.20
 -----------------------------------------------------------
-int sw=8;  //스위치 디지털 핀 8에 연결
-int led=7;  //LED 디지털 핀 7에 연결
+int sw = 8; //스위치 디지털 핀 8에 연결
+int led = 7; //LED 디지털 핀 7에 연결
+
 void setup()
 {
-  pinMode(sw, INPUT);  //디지털 핀 8 입력으로 설정
-  pinMode(led, OUTPUT);  //디지털 핀 7 출력으로 설정
+  pinMode(sw, INPUT_PULLUP);   //디지털 핀 8 입력으로 설정
+  pinMode(led, OUTPUT);    //디지털 핀 7 출력으로 설정
 }
 
 void loop()
 {
-  if(digitalRead(sw) == 0)  //디지털 핀 8의 신호가 0이면
+  if(digitalRead(sw) == LOW)  // 스위치 버튼 누르면 LOW
   {
-    digitalWrite(led,LOW);  //LED를 꺼라
+    digitalWrite(led, HIGH);  // LED 켜짐
   }
-  else   //아니면(디지털 핀 8의 신호가 1이면)
+  else
   {
-    digitalWrite(led, HIGH);  //LED를 켜라
+    digitalWrite(led, LOW);   // LED 꺼짐
   }
-  delay(100);
+  delay(100); // 100ms마다 계속해서 스위치 신호 들어오는지 여부 점검
 }
+
 -----------------------------------------------------------
 
 p.23 신호를 주는 사람 코드
@@ -81,40 +83,48 @@ void loop() {
 }
 -----------------------------------------------------------
 
+
 p.26
 -----------------------------------------------------------
-#define max_R 10000  //가변저항의 총 저항값 정의
-void setup() {
-  Serial.begin(9600); //시리얼 통신 속도를 9600으로 시작
-  Serial.println("Serial Com start");  //시리얼 통신 시작 문자 출력
-}
-void loop() {
-  int val=analogRead(A0);   //아날로그 A0에서 값을 읽어서 val에 저장, 0~1023 사이의 숫자
-  int resistor=map(val,0,1023,0,max_R);  //map함수 이용해서 아날로그값을 0 ~ max_R 사이의 저항값으로 변환
-  Serial.print("Resistor value:");
-  Serial.print(resistor);  //저항값 출력
-  Serial.println("ohm");
-  delay(200);
-}
------------------------------------------------------------
+#include <Servo.h> //서보모터 라이브러리 사용
 
+int sw = 8;  // 스위치 8핀에 연결
+int servoPin = 9; // 서보모터 신호 9핀에 연결
 
-p.29
------------------------------------------------------------
-#include <Servo.h>  //서보모터 라이브러리 사용
+Servo myServo;
 
-Servo servo;   //서보모터 객체를 servo로 생성
-int potPin=A0;  //
-int val;
+int angle = 0;
 
-void setup() {
-  servo.attach(9);  //서보모터 9핀에 연결
+// 버튼 상태 저장용
+int lastButtonState = HIGH;
+int currentButtonState = HIGH;
+
+void setup()
+{
+  pinMode(sw, INPUT_PULLUP);   // 버튼 한쪽이 GND에 연결된 구조
+  myServo.attach(servoPin);
+  myServo.write(angle);
 }
 
-void loop() {
-  val=analogRead(potPin);  //potPin값을 val에 저장
-  val=map(val,0,1023,0,179);   //map함수 이용해서 아날로그값 0 ~ 1023을 0 ~ 179으로 조정한 후 val에 저장
-  servo.write(val);  //val값에 따라 서보모터 이동
-  delay(50);
+void loop()
+{
+  currentButtonState = digitalRead(sw);
+
+  // 버튼이 눌린 순간 감지: HIGH -> LOW
+  if (lastButtonState == HIGH && currentButtonState == LOW)
+  {
+    angle = angle + 30;
+
+    if (angle > 180)
+    {
+      angle = 0;
+    }
+
+    myServo.write(angle);
+
+    delay(200);  // 간단한 디바운싱
+  }
+
+  lastButtonState = currentButtonState;
 }
 -----------------------------------------------------------
