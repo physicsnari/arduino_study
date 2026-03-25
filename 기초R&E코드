@@ -128,3 +128,24 @@ void loop()
   lastButtonState = currentButtonState;
 }
 -----------------------------------------------------------
+
+
+p.28
+-----------------------------------------------------------
+#include <Servo.h>  //서보모터 라이브러리 사용
+
+Servo servo;   //서보모터 객체를 servo로 생성
+int potPin=A0;  //
+int val;
+
+void setup() {
+  servo.attach(9);  //서보모터 9핀에 연결
+}
+
+void loop() {
+  val=analogRead(potPin);  //potPin값을 val에 저장
+  val=map(val,0,1023,0,179);   //map함수 이용해서 아날로그값 0 ~ 1023을 0 ~ 179으로 조정한 후 val에 저장
+  servo.write(val);  //val값에 따라 서보모터 이동
+  delay(50);
+}
+-----------------------------------------------------------
